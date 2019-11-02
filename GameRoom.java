@@ -234,7 +234,6 @@ public class GameRoom extends JFrame implements ActionListener, MouseListener {
 				} catch (IOException e1) {
 				}
 				//启动游戏
-				//先站个位置，待实现
 				new Gamearea(playerID, serverIP, lb.tablenum, lb.seatnum);
 			}
 		}
@@ -273,9 +272,27 @@ public class GameRoom extends JFrame implements ActionListener, MouseListener {
 	/*
 	 * 新的线程,接收服务器发来的信息
 	 */
-	@Override
-	public void actionPerformed(ActionEvent e) {
 
+	public void actionPerformed(ActionEvent e) {
+		if (e.getSource() == send) {
+			if (onlineplayer.getSelectedItem().toString().trim().equals("所有人")) {
+				receive.append(playerID + "向"
+						+ onlineplayer.getSelectedItem().toString().trim()
+						+ "说:" + send.getText() + "\n");
+			} else {
+				receive.append(playerID + "向"
+						+ onlineplayer.getSelectedItem().toString().trim()
+						+ "说(悄悄话):" + send.getText() + "\n");
+			}
+			try {
+				os.writeUTF("chating");
+				os.writeUTF(onlineplayer.getSelectedItem().toString().trim());
+				os.writeUTF(playerID);
+				os.writeUTF(send.getText());
+			} catch (IOException e1) {
+			}
+			send.setText("");
+		}
 	}
 
 	class Msgrev extends Thread {
@@ -321,7 +338,10 @@ public class GameRoom extends JFrame implements ActionListener, MouseListener {
 					/*
 					 * 聊天信息
 					 */
-
+					if (s.equals("chating")) {
+						s = is.readUTF();
+						receive.append(s + "\n");
+					}
 					/*
 					 * 离开一个人
 					 */
@@ -329,7 +349,14 @@ public class GameRoom extends JFrame implements ActionListener, MouseListener {
 					/*
 					 * 有用户加入seat
 					 */
-
+					if (s.equals("comeoneplayer")) {
+						int tn = Integer.parseInt((String) is.readUTF());
+						int sn = Integer.parseInt((String) is.readUTF());
+						seat[tn][sn].setIcon(new ImageIcon(
+								"pics\\icon\\online\\" + is.readUTF().trim()
+										+ ".gif"));
+						seat[tn][sn].state = true;
+					}
 					/*
 					 * 有玩家离开seat，重绘图形
 					 */
@@ -341,7 +368,7 @@ public class GameRoom extends JFrame implements ActionListener, MouseListener {
 					/*
 					 * 收到游戏开始信息，桌子颜色变化
 					 */
-					
+
 				} catch (IOException e) {
 					JOptionPane.showMessageDialog(null, "与服务器失去连接，请重新登录！",
 							"提示", JOptionPane.WARNING_MESSAGE);
