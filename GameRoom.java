@@ -345,7 +345,17 @@ public class GameRoom extends JFrame implements ActionListener, MouseListener {
 					/*
 					 * 离开一个人
 					 */
-
+					if (s.equals("someoneexit")) {
+						String exitname = is.readUTF();
+						receive.append(exitname + "离开了房间.\n");
+						int i = -1;
+						while (++i < onlineplayer.getItemCount()) {
+							if (onlineplayer.getItemAt(i).toString().equals(
+									exitname)) {
+								onlineplayer.removeItemAt(i);
+							}
+						}
+					}
 					/*
 					 * 有用户加入seat
 					 */
@@ -360,15 +370,28 @@ public class GameRoom extends JFrame implements ActionListener, MouseListener {
 					/*
 					 * 有玩家离开seat，重绘图形
 					 */
-
+					if (s.equals("oneplayerexitseat")) {
+						int tn = Integer.parseInt(is.readUTF());
+						int sn = Integer.parseInt(is.readUTF());
+						seat[tn][sn].setIcon(new ImageIcon(
+								"pics\\大厅\\seatn.png"));
+						seat[tn][sn].state = false;
+						table[tn]
+								.setIcon(new ImageIcon("pics\\大厅\\tablen.png"));
+					}
 					/*
 					 * 收到可以重新开始的信号，startflag重新置true
 					 */
-
+					if (s.equals("youcanstartagain")) {
+						startflag = false;
+					}
 					/*
 					 * 收到游戏开始信息，桌子颜色变化
 					 */
-
+					if (s.equals("Gamestart")) {
+						table[Integer.parseInt(is.readUTF())]
+								.setIcon(new ImageIcon("pics\\大厅\\tables.png"));
+					}
 				} catch (IOException e) {
 					JOptionPane.showMessageDialog(null, "与服务器失去连接，请重新登录！",
 							"提示", JOptionPane.WARNING_MESSAGE);
