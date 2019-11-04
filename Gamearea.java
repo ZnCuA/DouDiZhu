@@ -825,16 +825,73 @@ public class Gamearea extends JFrame implements MouseListener, Runnable,
 				/*
 				 * 游戏开始
 				 */
-				
+				if (s.equals("gamestart")) {
+					String allcards = is.readUTF();
+					firstchupai = Integer.parseInt(is.readUTF());// 最先出牌的seat号
+					CARDS = allcards.split("#");
+					initcard();
+					startflag = true; // 本局开始
+					if (!startanimation.isAlive()) {
+						startanimation = new Startanimation();
+						startanimation.start();
+					}
+					Playsound.play("audio//start.wav");
+					leftcardnum[(seatnum + 1) % 4].setVisible(true);
+					leftcardnum[(seatnum + 1) % 4].setText("剩余张数：13");
+					leftcardnum[(seatnum + 2) % 4].setVisible(true);
+					leftcardnum[(seatnum + 2) % 4].setText("剩余张数：13");
+					leftcardnum[(seatnum + 3) % 4].setVisible(true);
+					leftcardnum[(seatnum + 3) % 4].setText("剩余张数：13");
+				}
 
 				/*
 				 * 游戏信息
 				 */
-				
+				if (s.equals("oneplayerchupai")) {
+					int sn = Integer.parseInt(is.readUTF());
+					cardinfo = (is.readUTF()).split("#");
+					hidefrontcard(sn);
+					int length = cardinfo.length;
+					int leftnum = Integer.parseInt(leftcardnum[sn].getText()
+							.substring(5, leftcardnum[sn].getText().length()));
+					leftcardnum[sn].setText("剩余张数：" + (leftnum - length));
+					for (int i = 0; i < length; i++) {
+						cardfront[sn][(13 - length) / 2 + i]
+								.setImage("pics//cards//"
+										+ cardinfo[i].charAt(0)
+										+ cardinfo[i].substring(1, cardinfo[i]
+												.length()) + ".gif");
+						cardfront[sn][(13 - length) / 2 + i].setVisible(true);
+						repaint();
+					}
+					buchuarea[sn].setVisible(false);
+					Isnext = true;
+					if ((sn + 1) % 4 == this.seatnum) {
+						hideDown();
+						buchuarea[seatnum].setVisible(false);
+						chupai.setVisible(true);
+						buchu.setVisible(true);
+					}
+					repaint();
+				}
 				/*
 				 * 不出
 				 */
-				
+				if (s.equals("oneplayerbuchu")) {
+					int sn = Integer.parseInt(is.readUTF());
+					buchuarea[sn].setVisible(true);
+					hidefrontcard(sn);
+					Isnext = true;
+					if ((sn + 1) % 4 == this.seatnum) {
+						hideDown();
+						chupai.setVisible(true);
+						buchu.setVisible(true);
+						if (Rule.Issame(myoldcard, cardinfo)) {
+							buchu.setVisible(false);
+						}
+					}
+					repaint();
+				}
 				/*
 				 * 超时
 				 */
