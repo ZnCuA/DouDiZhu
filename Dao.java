@@ -6,25 +6,35 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.Iterator;
+
+import game.Server.ServerThread;
 
 public class Dao {
+	
+//	public static String driverName = "com.microsoft.sqlserver.jdbc.SQLServerDriver"; // 加载JDBC驱动
+//
+//	public static String dbURL = "jdbc:sqlserver://GAODONG-PC:1433; DatabaseName=RUSH"; // 连接服务器和数据库
+//
+//	public static String userName = "sa"; // 默认用户名
+//
+//	public static String userPwd = "123456"; // 密码
+	
 	private static String dbURL = "jdbc:mysql://localhost:3306/doudizhu?serverTimezone=UTC";
 	private static String driverName = "com.mysql.cj.jdbc.Driver";
 	private static String userName = "root";
-	private static String userPwd = "123456";
+	private static String userPwd = "";
+
 	public static Connection con = null;
 
 	public Dao() {
-		try{
-			Class.forName(driverName);  //加载驱动
-			try {
-				con = DriverManager.getConnection(dbURL,userName,userPwd);
-			//	System.out.println("success");
-			} catch (Exception e) {
-				e.printStackTrace();
+		try {
+			if (con == null) {
+				Class.forName(driverName);
+				con = DriverManager.getConnection(dbURL, userName, userPwd);
 			}
-		} catch(ClassNotFoundException e){
-			e.printStackTrace();
+		} catch (Exception e) {
 		}
 	}
 
@@ -50,7 +60,7 @@ public class Dao {
 		} catch (SQLException e) {
 		}
 		return info;
-//		return "2";
+
 	}
 
 	/*
@@ -68,7 +78,7 @@ public class Dao {
 		} catch (SQLException e) {
 		}
 		return false;
-//		return true;
+
 	}
 
 	/*
@@ -151,4 +161,30 @@ public class Dao {
 			e.printStackTrace();
 		}
 	}
+	
+	public ArrayList Get() {
+		ArrayList<personSorce> scorequeue = new ArrayList<personSorce>();
+		try {
+			Statement sql = con.createStatement();
+			String str="select userid,score from userinfo order by score ";
+			ResultSet rs = sql.executeQuery(str);
+			while(rs.next()) {
+				personSorce e =new personSorce(rs.getString("userid"),rs.getInt("score"));
+				scorequeue.add(e);
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return scorequeue;
+	}
+//	public static void main(String[] args) {
+//		Dao d= new Dao();
+//		String score="";
+//		ArrayList<personSorce> scorequeue=d.Get();
+//		for (Iterator<personSorce> list = scorequeue.iterator(); list.hasNext();) {
+//			score += list.next().getScore();
+//			score += "#";
+//			System.out.println(score);
+//	    }
+//	}
 }
