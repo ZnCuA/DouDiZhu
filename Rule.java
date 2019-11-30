@@ -62,6 +62,10 @@ public class Rule {
 				result = true;
 				Playsound.play("audio//Man//sandaier.wav");
 			}
+			if (duizi(y) != 0) {
+				result = true;
+				Playsound.play("audio//Man//zhadan.wav");
+			}
 			break;
 		case 6:
 			if (shunzi(y) != 0) {
@@ -76,11 +80,19 @@ public class Rule {
 				result = true;
 				Playsound.play("audio//Man//liandui.wav");
 			}
+			if (duizi(y) != 0) {
+				result = true;
+				Playsound.play("audio//Man//zhadan.wav");
+			}
 			break;
 		case 7:
 			if (shunzi(y) != 0) {
 				result = true;
 				Playsound.play("audio//Man//shunzi.wav");
+			}
+			if (duizi(y) != 0) {
+				result = true;
+				Playsound.play("audio//Man//zhadan.wav");
 			}
 			break;
 		case 8:
@@ -91,6 +103,10 @@ public class Rule {
 			if (liandui(y) != 0) {
 				result = true;
 				Playsound.play("audio//Man//liandui.wav");
+			}
+			if (duizi(y) != 0) {
+				result = true;
+				Playsound.play("audio//Man//zhadan.wav");
 			}
 			break;
 		case 9:
@@ -106,7 +122,8 @@ public class Rule {
 				result = true;
 				Playsound.play("audio//Man//shunzi.wav");
 			}
-			if (sansanerer(y) != 0) {
+			if (feiji(y) != 0) {
+				Playsound.play("audio//Man//feiji.wav");
 				result = true;
 
 			}
@@ -141,6 +158,11 @@ public class Rule {
 				Playsound.play("audio//Man//shunzi.wav");
 			}
 			break;
+		case 15:
+			if (feijichibang(y) != 0) {
+				Playsound.play("audio//Man//feiji.wav");///没有飞机带翅膀的音频
+				result = true;
+			}
 		}
 		return result;
 	}
@@ -162,9 +184,22 @@ public class Rule {
 			dataX[i] = Integer.parseInt(x[i].substring(1, x[i].length()));
 			dataY[i] = Integer.parseInt(y[i].substring(1, y[i].length()));
 		}
-		if (lengthX == 4 && lengthY != 4 && duizi(dataX) != 0) {
+		if ((lengthX == 4 || lengthX == 5 || lengthX == 6 || lengthX == 7 || lengthX == 8) && lengthY != 4 && duizi(dataX) != 0) {
 			Playsound.play("audio/Man/zhadan.wav");
 			return true;
+		}
+		if(duizi(dataX) != 0 && duizi(dataY) != 0)
+		{
+			if(lengthX == lengthY && duizi(dataX) > duizi(dataY))
+			{
+				Playsound.play("audio/Man/zhadan.wav");
+				return true;
+			}	
+			if(lengthX > lengthY)
+			{
+				Playsound.play("audio/Man/zhadan.wav");
+				return true;
+			}
 		}
 		switch (lengthX) {
 		case 1:
@@ -217,7 +252,7 @@ public class Rule {
 		case 10:
 			if (shunzi(dataX) > shunzi(dataY))
 				result = true;
-			if (sansanerer(dataX) > sansanerer(dataY))
+			if (feiji(dataX) > feiji(dataY))
 				result = true;
 			break;
 		case 11:
@@ -236,6 +271,10 @@ public class Rule {
 			if (shunzi(dataX) > shunzi(dataY))
 				result = true;
 			break;
+		case 15:
+			if (feijichibang(dataX) > feijichibang(dataY))
+				result = true;
+			break;
 		}
 		if (result)
 			Playsound.play("audio//Man//dani" + new Random().nextInt(100) % 3
@@ -244,22 +283,55 @@ public class Rule {
 	}
 
 	/*
-	 * AAABBBXXYY,返回牌得优先级
+	 * AAABBBXXYY飞机,返回牌得优先级
 	 */
-	private static int sansanerer(int[] y) {
+	private static int feiji(int[] y) {
+		//XXYYAAABBB
 		if (y[0] == y[1] && y[2] == y[3] && y[4] == y[5] && y[5] == y[6]
 				&& y[6] == y[7] - 1 && y[7] == y[8] && y[8] == y[9])
 			return y[4];
+		//XXAAABBBYY
 		else if (y[0] == y[1] && y[2] == y[3] && y[3] == y[4]
 				&& y[4] == y[5] - 1 && y[5] == y[6] && y[6] == y[7]
 				&& y[8] == y[9])
 			return y[2];
+		//AAABBBXXYY
 		else if (y[0] == y[1] && y[1] == y[2] && y[2] == y[3] - 1
 				&& y[3] == y[4] && y[4] == y[5] && y[6] == y[7] && y[8] == y[9])
 			return y[0];
 		return 0;
 	}
 
+	/*
+	 *AAABBBCCCXXYYZZ飞机带翅膀(15张)
+	 */
+	private static int feijichibang(int[] y) {
+		//XXYYZZAAABBBCCC
+		if(y[0] == y[1] && y[2] == y[3] && y[4] == y[5] && y[6] == y[7] 
+				&& y[7] == y[8] && y[8] == y[9] - 1 && y[9] == y[10]
+						&& y[10] == y[11] && y[11] == y[12]-1
+						&& y[12] == y[13] && y[13] == y[14])
+			return y[6];
+		//XXYYAAABBBCCCZZ
+		else if (y[0] == y[1] && y[2] == y[3] && y[4] == y[5] && y[5] == y[6] 
+				&& y[6] == y[7]-1 && y[7] == y[8] && y[8] == y[9]
+						&& y[9] == y[10]-1 && y[10] == y[11]
+						&& y[11] == y[12] && y[13] == y[14])
+			return y[4];
+		//XXAAABBBCCCYYZZ
+		else if (y[0] == y[1] && y[2] == y[3] && y[3] == y[4] && y[4] == y[5]-1 
+				&& y[5] == y[6] && y[6] == y[7] && y[7] == y[8]-1
+						&& y[8] == y[9] && y[9] == y[10]
+						&& y[11] == y[12] && y[13] == y[14])
+			return y[2];
+		//AAABBBCCCXXYYZZ
+		else if (y[0] == y[1] && y[1] == y[2] && y[2] == y[3]-1 && y[3] == y[4]
+				&& y[4] == y[5] && y[5] == y[6]-1 && y[6] == y[7]
+						&& y[7] == y[8] && y[9] == y[10]
+						&& y[11] == y[12] && y[13] == y[14])
+			return y[0];
+		return 0;
+	}
 	/*
 	 * n个三相连
 	 */
@@ -314,5 +386,8 @@ public class Rule {
 		}
 		return x[0];
 	}
+	/*
+	 * 
+	 */
 
 }
