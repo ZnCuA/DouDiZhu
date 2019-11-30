@@ -1,6 +1,8 @@
 package game;
 
 import java.awt.BorderLayout;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
@@ -39,15 +41,15 @@ public class Server extends JFrame implements ActionListener {
 	// 存放线程
 	ArrayList<ServerThread> playerlist = new ArrayList<ServerThread>();
 
-	// 花色
-	String[] color = { "c", "d", "s", "h" };
-
-	// 牌数字
-	String[] num = { "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13",
-			"14", "15" };
+//	// 花色
+//	String[] color = { "c", "d", "s", "h" };
+//
+//	// 牌数字
+//	String[] num = { "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13",
+//			"14", "15" };
 
 	// 随机分成的四组
-	String[][] player = new String[4][13];
+	String[][] player = new String[4][25];
 
 	Server() {
 		setTitle("服务器");
@@ -61,6 +63,7 @@ public class Server extends JFrame implements ActionListener {
 		validate();//用于刷新
 		dao = new Dao();
 		startServer(6666);
+
 	}
 
 	class ExitWindow extends WindowAdapter {
@@ -87,27 +90,32 @@ public class Server extends JFrame implements ActionListener {
 		close.addActionListener(this);
 	}
 
-	/*
-	 * 随机分成四组牌分发给玩家
-	 */
+
 	public void Randomization() {
-		int[] a = new int[4];
-		for (int i = 0; i < 4; i++)
-			a[i] = 0;
-		for (int i = 0; i < 13; i++)
-			for (int j = 0; j < 4; j++) {
-				int row = (new Random().nextInt(100)) % 4;
-				if (a[row] < 13)
-					player[row][a[row]++] = "" + color[j] + num[i];
-				else {
-					while (a[row] >= 13)
-						row = (row + 1) % 4;
-					player[row][a[row]++] = "" + color[j] + num[i];
-				}
+		test4 fapai = new test4();
+		
+		int i = 0;
+		for (int j = 0; j < 25; j++) {
+			player[0][j] = fapai.player01.get(i);
+			i++;
+		}
+		i = 0;
+		for (int j = 0; j < 25; j++) {
+			player[1][j] = fapai.player02.get(i);
+			i++;
+		}
+		i = 0;
+		for (int j = 0; j < 25; j++) {
+			player[2][j] = fapai.player03.get(i);
+			i++;
+		}
+		i = 0;
+		for (int j = 0; j < 25; j++) {
+			player[3][j] = fapai.player04.get(i);
+			i++;
+		}
 
-			}
 	}
-
 	public void startServer(int port) {
 		try {
 			
@@ -188,7 +196,44 @@ public class Server extends JFrame implements ActionListener {
 							 */
 							dao.setState("1", id);
 							os.writeUTF("2");
+							/*
+							 * 向客户端发送当前有哪些玩家在线
+							 */
+							os.writeUTF("otheronlineplayer");
+							for (int i = 0; i < playerlist.size(); i++) {
+								ServerThread th = playerlist.get(i);
+								if (th != this && th.location.equals("hall"))
+									os.writeUTF(th.id);
+							}
+							os.writeUTF("END1");
+							/*
+							 * 向客户端发送seat里面的玩家
+							 */
+							for (int i = 0; i < playerlist.size(); i++) {
+								ServerThread th = playerlist.get(i);
+								if (th.location.equals("seat")) {
+									os.writeUTF((th.tablenum + "").toString());
+									os.writeUTF((th.seatnum + "").toString());
+									os.writeUTF(dao.getIcon(th.id));
+								}
+							}
+							os.writeUTF("END2");
+							os.writeUTF(dao.getScore(this.id) + "");
+							os.writeUTF(dao.getIcon(this.id));
+							/*
+							 * 登陆后将自己加入到playerlist链表中，并向其他玩家发送进入房间信息
+							 */
+							playerlist.add(this);
+							for (int i = 0; i < playerlist.size(); i++) {
+								ServerThread th = playerlist.get(i);
+								th.os.writeUTF("Newcomer");
+								th.os.writeUTF(id);
+							}
 
+							// 服务器记录日志
+							nowtime = tempDate.format(new java.util.Date());
+							text.append(nowtime + "\n用户：" + id + "\nIP地址："
+									+ youraddress.toString() + " 进入了房间\n");
 
 						} else if (result.equals("1")) {
 							os.writeUTF("1"); // 重复登录
@@ -210,7 +255,245 @@ public class Server extends JFrame implements ActionListener {
 						}else
 							os.writeUTF("failed");
 					}
-					//其余通信逻辑待编写
+					/*
+					 * 玩家聊天信息
+					 */
+					if (s.equals("chating")) {
+						String toname = is.readUTF();
+						String fromname = is.readUTF();
+						String text = is.readUTF();
+						if (toname.equals("所有人")) {
+							for (int i = 0; i < playerlist.size(); i++) {
+								ServerThread th = playerlist.get(i);
+								if (th != this && th.location.equals("hall")) {
+									th.os.writeUTF("chating");
+									th.os.writeUTF(fromname + "向所有人说:" + text);
+								}
+							}
+						} else {
+							for (int i = 0; i < playerlist.size(); i++) {
+								ServerThread th = playerlist.get(i);
+								if (th.id.equals(toname.trim())
+										&& th.location.equals("hall")) {
+									th.os.writeUTF("chating");
+									th.os.writeUTF(fromname + "向" + toname
+											+ "说(悄悄话):" + text);
+								}
+							}
+						}
+					}
+
+					/*
+					 * 进入游戏table的信息，向大厅的其他用户通知
+					 */
+					if (s.equals("entertable")) {
+						String tn = is.readUTF();
+						String sn = is.readUTF();
+						tablenum = Integer.parseInt(tn);// 得到桌子号
+						seatnum = Integer.parseInt(sn);// 得到座位号
+						for (int i = 0; i < playerlist.size(); i++) {
+							ServerThread th = playerlist.get(i);
+							if (th.location.equals("hall")) {
+								th.os.writeUTF("comeoneplayer");
+								th.os.writeUTF((tablenum + "").toString());
+								th.os.writeUTF((seatnum + "").toString());
+								th.os.writeUTF(dao.getIcon(id));
+							}
+						}
+					}
+					/*
+					 * 进入游戏seat，实际上是另一条线程的新加入
+					 */
+					if (s.equals("enterseat")) {
+						location = "seat";// 修改位置，说明这是一条新的线程
+						id = is.readUTF();
+						String tn = is.readUTF();
+						String sn = is.readUTF();
+						tablenum = Integer.parseInt(tn);// 得到桌子号
+						seatnum = Integer.parseInt(sn);// 得到座位号
+						// playerlist加入此线程
+						playerlist.add(this);
+
+						/*
+						 * 向本桌的其他player发送信息
+						 */
+						for (int i = 0; i < playerlist.size(); i++) {
+							ServerThread th = playerlist.get(i);
+							if (th != this && th.tablenum == this.tablenum
+									&& th.location.equals("seat")) {
+								// 初始化本桌其他用户信息
+								os.writeUTF("initotherplayer");
+								os.writeUTF(th.seatnum + "");
+								os.writeUTF(th.readyflag + "");
+								os.writeUTF(th.id);
+								// -------
+								th.os.writeUTF("oneplayercomein");
+								th.os.writeUTF(this.seatnum + "");
+								th.os.writeUTF(this.id + "");
+							}
+						}
+					}
+
+					/*
+					 * 收到准备好信息,向本桌其他用户通知此玩家准备好信息
+					 */
+					if (s.equals("ready")) {
+						this.readyflag = true;
+						int count = 0;
+						for (int i = 0; i < playerlist.size(); i++) {
+							ServerThread th = playerlist.get(i);
+							if (th != this && th.tablenum == this.tablenum
+									&& th.location.equals("seat")) {
+								if (th.readyflag == true)
+									count++;
+								th.os.writeUTF("oneplayerready");
+								th.os.writeUTF(this.seatnum + "");
+							}
+						}
+						// count==3，说明4人都准备好，游戏可以开始了！
+						if (count == 3) {
+							Randomization();// 牌随机分成4组
+							String num = (new Random().nextInt(100) % 4) + "";
+							for (int i = 0; i < playerlist.size(); i++) {
+								ServerThread th = playerlist.get(i);
+								if (th.tablenum == this.tablenum
+										&& th.location.equals("hall")) {
+									th.os.writeUTF("Gamestart");
+									th.os.writeUTF(tablenum + "");
+								}
+								if (th.tablenum == this.tablenum
+										&& th.location.equals("seat")) {
+									th.os.writeUTF("gamestart");
+									String cards = "";
+									for (int j = 0; j < 25; j++)
+										cards += player[th.seatnum][j] + "#";
+									th.os.writeUTF(cards);
+									// 随机发出最先出牌的玩家
+									th.os.writeUTF(num);
+								}
+							}
+						}
+					}
+					/*
+					 * 游戏信息,最主要的信息传递
+					 */
+
+					if (s.equals("gameinfo")) {
+						String type = is.readUTF();// 不出、出牌或超时
+						if (type.equals("buchu")) {
+							for (int i = 0; i < playerlist.size(); i++) {
+								ServerThread th = playerlist.get(i);
+								if (th != this && th.tablenum == this.tablenum
+										&& th.location.equals("seat")) {
+									th.os.writeUTF("oneplayerbuchu");
+									th.os.writeUTF(this.seatnum + "");
+								}
+							}
+						} else if (type.equals("chaoshi")) {
+							for (int i = 0; i < playerlist.size(); i++) {
+								ServerThread th = playerlist.get(i);
+								if (th != this && th.tablenum == this.tablenum
+										&& th.location.equals("seat")) {
+									th.os.writeUTF("oneplayerchaoshi");
+									th.os.writeUTF(this.seatnum + "");
+								}
+							}
+						} else if (type.equals("chupai")) {
+							String info = is.readUTF();
+							for (int i = 0; i < playerlist.size(); i++) {
+								ServerThread th = playerlist.get(i);
+								if (th != this && th.tablenum == this.tablenum
+										&& th.location.equals("seat")) {
+									th.os.writeUTF("oneplayerchupai");
+									th.os.writeUTF(this.seatnum + "");
+									th.os.writeUTF(info);
+								}
+							}
+						}
+
+					}
+
+					if (s.equals("oneplayerwin")) {
+						for (int i = 0; i < playerlist.size(); i++) {
+							ServerThread th = playerlist.get(i);
+							if (th != this && th.tablenum == this.tablenum
+									&& th.location.equals("seat")) {
+								dao.updateScore(th.id, -5);
+								th.os.writeUTF("youfailed");
+								th.os.writeUTF(this.id + "");
+							}
+							if (th == this) {
+								os.writeUTF("youwin");
+								dao.updateScore(id, 15);
+							}
+						}
+					}
+					/*
+					 * 游戏交谈
+					 */
+					if (s.equals("gametalking")) {
+						String text = is.readUTF();
+						for (int i = 0; i < playerlist.size(); i++) {
+							ServerThread th = playerlist.get(i);
+							if (th != this && th.tablenum == this.tablenum
+									&& th.location.equals("seat")) {
+								th.os.writeUTF("gametalking");
+								th.os.writeUTF(this.id + "");
+								th.os.writeUTF(text);
+							}
+						}
+					}
+
+					/*
+					 * 退出seat信息
+					 */
+					if (s.equals("exitseat")) {
+						String tn = is.readUTF();
+						String sn = is.readUTF();
+						for (int i = 0; i < playerlist.size(); i++) {
+							ServerThread th = playerlist.get(i);
+							if (th != this && th.location.equals("hall")) {
+								th.os.writeUTF("oneplayerexitseat");
+								th.os.writeUTF(tn);
+								th.os.writeUTF(sn);
+							}
+							if ((th.id).equals(id)
+									&& th.location.equals("hall")) {
+								th.os.writeUTF("youcanstartagain");
+							}
+							if (th != this && th.tablenum == this.tablenum
+									&& th.location.equals("seat")) {
+								th.os.writeUTF("oneplayerexit");
+								th.os.writeUTF(seatnum + "");
+								th.os.writeUTF(id);
+								th.readyflag = false;
+							}
+						}
+						// playerlist链中移除
+						playerlist.remove(this);
+						break;
+					}
+					/*
+					 * 退出大厅信息
+					 */
+					if (s.equals("exit")) {
+						s = is.readUTF();
+						for (int i = 0; i < playerlist.size(); i++) {
+							ServerThread th = playerlist.get(i);
+							if (th != this) {
+								th.os.writeUTF("someoneexit");
+								th.os.writeUTF(id);
+							}
+						}
+						// 把自己从playerlist去除
+						playerlist.remove(this);
+						// 服务器记录日志
+						dao.setState("0", id);
+						nowtime = tempDate.format(new java.util.Date());
+						text.append(nowtime + "\n用户：" + id + "\nIP地址："
+								+ youraddress.toString() + " 离开了房间\n");
+						this.stop();
+					}
 
 					// END
 				} catch (IOException e) {
