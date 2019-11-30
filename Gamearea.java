@@ -36,7 +36,7 @@ public class Gamearea extends JFrame implements MouseListener, Runnable,
 
 	JLabel[] leftcardnum = new JLabel[4]; // 剩余张数
 
-	int myleftcard = 13;
+	int myleftcard = 25;
 
 	JLabel timearea; // 时间显示区域
 
@@ -54,25 +54,25 @@ public class Gamearea extends JFrame implements MouseListener, Runnable,
 
 	JLabel[] rolefropic = new JLabel[4];
 
-	Card[] card = new Card[14];
+	Card[] card = new Card[26];
 
-	Card[][] cardfront = new Card[4][13]; // player出的牌
+	Card[][] cardfront = new Card[4][25]; // player出的牌
 
 	Startanimation startanimation;
 
 	Timepass timepass;
 
-	boolean[] cardclick = new boolean[14]; // 是否已点击牌
+	boolean[] cardclick = new boolean[26]; // 是否已点击牌
 
-	boolean[] cardsend = new boolean[14]; // 牌是否出了
+	boolean[] cardsend = new boolean[26]; // 牌是否出了
 
 	int firstchupai = -1;// 先出牌的seat号
 
-	String[] CARDS = new String[13]; // 用于接收13张牌
+	String[] CARDS = new String[25]; // 用于接收13张牌
 
-	Point[] endpos = new Point[14];
+	Point[] endpos = new Point[26];//原本为14
 
-	Point[] startpos = new Point[14];
+	Point[] startpos = new Point[26];//原本为14
 
 	boolean startflag = false; // 游戏是否开始
 
@@ -82,11 +82,11 @@ public class Gamearea extends JFrame implements MouseListener, Runnable,
 
 	String playerID = null; // 自己的ID
 
-	String[] cardinfo = new String[13]; // 记录上一个出牌player的牌信息
+	String[] cardinfo = new String[25]; // 记录上一个出牌player的牌信息
 
-	String[] mycard = new String[13]; // 记录自己出牌信息
+	String[] mycard = new String[25]; // 记录自己出牌信息
 
-	String[] myoldcard = new String[13]; // 记录自己前一论出的牌
+	String[] myoldcard = new String[25]; // 记录自己前一论出的牌
 
 	int tablenum, seatnum;// 桌子号，seat号
 
@@ -113,7 +113,7 @@ public class Gamearea extends JFrame implements MouseListener, Runnable,
 			os.writeUTF(seatnum + "");
 		} catch (IOException e) {
 		}
-		for (int i = 0; i < 13; i++) {
+		for (int i = 0; i < 25; i++) {
 			cardinfo[i] = "";
 			mycard[i] = "";
 			myoldcard[i] = "";
@@ -239,29 +239,29 @@ public class Gamearea extends JFrame implements MouseListener, Runnable,
 		/*
 		 * 三个player出的牌
 		 */
-		for (int i = 0; i < 13; i++) {
-			cardfront[(seatnum + 1) % 4][12 - i] = new Card();
-			cardfront[(seatnum + 1) % 4][12 - i].setVisible(false);
-			cardfront[(seatnum + 1) % 4][12 - i].setBounds(570 - i * 15, 250,
+		for (int i = 0; i < 25; i++) {
+			cardfront[(seatnum + 1) % 4][24 - i] = new Card();
+			cardfront[(seatnum + 1) % 4][24 - i].setVisible(false);  //15待修改，或许太大
+			cardfront[(seatnum + 1) % 4][24 - i].setBounds(570 - i * 15, 250,
 					65, 100);
-			gamearea.add(cardfront[(seatnum + 1) % 4][12 - i]);
-			cardfront[(seatnum + 1) % 4][12 - i].addMouseListener(this);
+			gamearea.add(cardfront[(seatnum + 1) % 4][24 - i]);
+			cardfront[(seatnum + 1) % 4][24 - i].addMouseListener(this);
 		}
-		for (int i = 0; i < 13; i++) {
-			cardfront[(seatnum + 2) % 4][12 - i] = new Card();
-			cardfront[(seatnum + 2) % 4][12 - i].setVisible(false);
-			cardfront[(seatnum + 2) % 4][12 - i].setBounds(440 - i * 15, 140,
+		for (int i = 0; i < 25; i++) {
+			cardfront[(seatnum + 2) % 4][24 - i] = new Card();
+			cardfront[(seatnum + 2) % 4][24 - i].setVisible(false);
+			cardfront[(seatnum + 2) % 4][24 - i].setBounds(440 - i * 15, 140,
 					65, 100);
-			gamearea.add(cardfront[(seatnum + 2) % 4][12 - i]);
-			cardfront[(seatnum + 2) % 4][12 - i].addMouseListener(this);
+			gamearea.add(cardfront[(seatnum + 2) % 4][24 - i]);
+			cardfront[(seatnum + 2) % 4][24 - i].addMouseListener(this);
 		}
-		for (int i = 0; i < 13; i++) {
-			cardfront[(seatnum + 3) % 4][12 - i] = new Card();
-			cardfront[(seatnum + 3) % 4][12 - i].setVisible(false);
-			cardfront[(seatnum + 3) % 4][12 - i].setBounds(280 - i * 15, 245,
+		for (int i = 0; i < 25; i++) {
+			cardfront[(seatnum + 3) % 4][24 - i] = new Card();
+			cardfront[(seatnum + 3) % 4][24 - i].setVisible(false);
+			cardfront[(seatnum + 3) % 4][24 - i].setBounds(280 - i * 15, 245,
 					65, 100);
-			gamearea.add(cardfront[(seatnum + 3) % 4][12 - i]);
-			cardfront[(seatnum + 2) % 4][12 - i].addMouseListener(this);
+			gamearea.add(cardfront[(seatnum + 3) % 4][24 - i]);
+			cardfront[(seatnum + 2) % 4][24 - i].addMouseListener(this);
 		}
 
 		for (int i = 0; i < 4; i++) {
@@ -316,7 +316,7 @@ public class Gamearea extends JFrame implements MouseListener, Runnable,
 	 * 清空某一玩家的牌
 	 */
 	public void hidefrontcard(int sn) {
-		for (int i = 0; i < 13; i++) {
+		for (int i = 0; i < 25; i++) {
 			cardfront[sn][i].setVisible(false);
 		}
 	}
@@ -325,7 +325,7 @@ public class Gamearea extends JFrame implements MouseListener, Runnable,
 	 * 清空自己玩家的牌
 	 */
 	public void hideDown() {
-		for (int i = 1; i <= 13; i++) {
+		for (int i = 1; i <= 25; i++) {
 			if (cardsend[i]) {
 				card[i].setVisible(false);
 				repaint();
@@ -368,17 +368,16 @@ public class Gamearea extends JFrame implements MouseListener, Runnable,
 	}
 
 	public void initcard() {
-		for (int i = 13; i >= 1; i--) {
+		for (int i = 25; i >= 1; i--) {
 			card[i] = new Card();
 			gamearea.add(card[i]);
 			card[i].setVisible(false);
-			card[i].setBounds(210 + 20 * i, 520, 65, 100);
-			card[i].setImage("pics//cards//" + CARDS[13 - i].charAt(0)
-					+ CARDS[13 - i].substring(1, CARDS[13 - i].length())
+			card[i].setBounds(150 + 20 * i, 520, 65, 100);
+			card[i].setImage("pics//cards//" + CARDS[25 - i].charAt(0)
+					+ CARDS[25 - i].substring(1, CARDS[25 - i].length())
 					+ ".gif");
-			card[i].priority = Integer.parseInt(CARDS[13 - i].substring(1,
-					CARDS[13 - i].length())); // 获得牌的大小
-			card[i].cardtype = CARDS[13 - i].charAt(0) + ""; // 获得牌的种类
+			card[i].priority = Integer.parseInt(CARDS[25 - i].substring(1,CARDS[25 - i].length())); // 获得牌的大小//
+			card[i].cardtype = CARDS[25 - i].charAt(0) + ""; // 获得牌的种类
 			card[i].addMouseListener(this);
 			cardclick[i] = false;
 			cardsend[i] = false;
@@ -393,7 +392,7 @@ public class Gamearea extends JFrame implements MouseListener, Runnable,
 
 	public void Repaintleftcard(int cardnum) {
 		int temp = cardnum;
-		for (int i = 13; i >= 1; i--)
+		for (int i = 25; i >= 1; i--)
 			if (!cardclick[i] && !cardsend[i]) {
 				card[i].setBounds(350 + 10 * cardnum - 20 * (cardnum - temp--),
 						520, 65, 100);
@@ -402,7 +401,7 @@ public class Gamearea extends JFrame implements MouseListener, Runnable,
 
 	public void getPos(int cardnum) {
 		int temp = cardnum;
-		for (int i = 13; i >= 1; i--)
+		for (int i = 25; i >= 1; i--)
 			if (cardclick[i] && cardsend[i]) {
 				startpos[i].x = card[i].getX();
 				startpos[i].y = card[i].getY();
@@ -428,7 +427,7 @@ public class Gamearea extends JFrame implements MouseListener, Runnable,
 	}
 
 	public void Cardreturn() {
-		for (int i = 1; i <= 13; i++)
+		for (int i = 1; i <= 25; i++)
 			if (cardclick[i] && !cardsend[i]) {
 				cardclick[i] = false;
 				Cardup(card[i], -20);
@@ -460,7 +459,7 @@ public class Gamearea extends JFrame implements MouseListener, Runnable,
 			if (e.getSource() == chupai) {
 				int k = 0;
 				String info = "";
-				for (int i = 1; i <= 13; i++) {
+				for (int i = 1; i <= 25; i++) {
 					if (cardclick[i] && !cardsend[i]) {
 						cardsend[i] = true;
 						info += card[i].cardtype + card[i].priority + "#";
@@ -472,7 +471,7 @@ public class Gamearea extends JFrame implements MouseListener, Runnable,
 					return;
 				if (Rule.Issame(myoldcard, cardinfo)) {
 					if (!Rule.Isregular(mycard)) {
-						for (int i = 1; i <= 13; i++) {
+						for (int i = 1; i <= 25; i++) {
 							if (cardclick[i] && cardsend[i])
 								cardsend[i] = false;
 						}
@@ -480,7 +479,7 @@ public class Gamearea extends JFrame implements MouseListener, Runnable,
 					}
 				} else {
 					if (!Rule.Isregular(mycard, cardinfo)) {
-						for (int i = 1; i <= 13; i++) {
+						for (int i = 1; i <= 25; i++) {
 							if (cardclick[i] && cardsend[i])
 								cardsend[i] = false;
 						}
@@ -491,7 +490,7 @@ public class Gamearea extends JFrame implements MouseListener, Runnable,
 						}
 					}
 				}
-				Repaintleftcard(13 - k);
+				Repaintleftcard(25 - k);
 				if (k != 0) {
 					getPos(k);
 					new Cardanimation(k).start();
@@ -543,7 +542,7 @@ public class Gamearea extends JFrame implements MouseListener, Runnable,
 			}
 		}
 		if (e.getSource() instanceof Card) {
-			for (int i = 1; i <= 13; i++)
+			for (int i = 1; i <= 25; i++)
 				if (e.getSource() == card[i] && !cardsend[i]) {
 					if (cardclick[i] == false) {
 						cardclick[i] = true;
@@ -572,7 +571,7 @@ public class Gamearea extends JFrame implements MouseListener, Runnable,
 				buchu.setIcon(new ImageIcon("pics\\button\\不出x.png"));
 		}
 		if (e.getSource() instanceof Card) {
-			for (int i = 1; i <= 13; i++)
+			for (int i = 1; i <= 25; i++)
 				if (e.getSource() == card[i] && cardclick[i] == false) {
 					Cardup(card[i], 5);
 					break;
@@ -596,7 +595,7 @@ public class Gamearea extends JFrame implements MouseListener, Runnable,
 				buchu.setIcon(new ImageIcon("pics\\button\\不出.png"));
 		}
 		if (e.getSource() instanceof Card) {
-			for (int i = 1; i <= 13; i++)
+			for (int i = 1; i <= 25; i++)
 				if (e.getSource() == card[i] && cardclick[i] == false) {
 					Cardup(card[i], -5);
 					break;
@@ -675,7 +674,7 @@ public class Gamearea extends JFrame implements MouseListener, Runnable,
 					} catch (InterruptedException e) {
 						e.printStackTrace();
 					}
-					role[seatnum].setBounds(300 - 2 * i, 350 + i, 130, 210);
+					role[seatnum].setBounds(200 - 2 * i, 350 + i, 130, 210);
 					role[(seatnum + 1) % 4].setBounds(500 + i, 190, 130, 210);
 					role[(seatnum + 2) % 4].setBounds(270 - i, 30 - i / 3, 130,
 							210);
@@ -683,7 +682,7 @@ public class Gamearea extends JFrame implements MouseListener, Runnable,
 				}
 			}
 			// 图片一张一张出现
-			for (int i = 1; i <= 13; i++) {
+			for (int i = 1; i <= 25; i++) {
 				card[i].setVisible(true);
 				repaint();
 				Playsound.play("audio//give.wav");
@@ -713,7 +712,7 @@ public class Gamearea extends JFrame implements MouseListener, Runnable,
 			while (++f <= 380) {
 				f = f + 4;
 				int temp = cardnum;
-				for (int i = 13; i >= 1; i--) {
+				for (int i = 25; i >= 1; i--) {
 					if (cardclick[i] && cardsend[i]) {
 						temp--;
 						if (temp < cardnum / 2)
@@ -728,7 +727,7 @@ public class Gamearea extends JFrame implements MouseListener, Runnable,
 				}
 			}
 			Playsound.play("audio//give.wav");
-			for (int i = 13; i >= 1; i--)
+			for (int i = 25; i >= 1; i--)
 				if (cardclick[i]) {
 					cardclick[i] = false;
 					card[i].setBounds(endpos[i].x, endpos[i].y, 65, 100);
@@ -805,13 +804,13 @@ public class Gamearea extends JFrame implements MouseListener, Runnable,
 						start.setVisible(true);
 						chupai.setVisible(false);
 						buchu.setVisible(false);
-						for (int i = 1; i <= 13; i++)
+						for (int i = 1; i <= 25; i++)
 							card[i].setVisible(false);
 
-						cardinfo = new String[13];
-						mycard = new String[13];
-						myoldcard = new String[13];
-						for (int i = 0; i < 13; i++) {
+						cardinfo = new String[25];
+						mycard = new String[25];
+						myoldcard = new String[25];
+						for (int i = 0; i < 25; i++) {
 							cardinfo[i] = "";
 							mycard[i] = "";
 							myoldcard[i] = "";
@@ -837,11 +836,11 @@ public class Gamearea extends JFrame implements MouseListener, Runnable,
 					}
 					Playsound.play("audio//start.wav");
 					leftcardnum[(seatnum + 1) % 4].setVisible(true);
-					leftcardnum[(seatnum + 1) % 4].setText("剩余张数：13");
+					leftcardnum[(seatnum + 1) % 4].setText("剩余张数：25");
 					leftcardnum[(seatnum + 2) % 4].setVisible(true);
-					leftcardnum[(seatnum + 2) % 4].setText("剩余张数：13");
+					leftcardnum[(seatnum + 2) % 4].setText("剩余张数：25");
 					leftcardnum[(seatnum + 3) % 4].setVisible(true);
-					leftcardnum[(seatnum + 3) % 4].setText("剩余张数：13");
+					leftcardnum[(seatnum + 3) % 4].setText("剩余张数：25");
 				}
 
 				/*
@@ -856,12 +855,12 @@ public class Gamearea extends JFrame implements MouseListener, Runnable,
 							.substring(5, leftcardnum[sn].getText().length()));
 					leftcardnum[sn].setText("剩余张数：" + (leftnum - length));
 					for (int i = 0; i < length; i++) {
-						cardfront[sn][(13 - length) / 2 + i]
+						cardfront[sn][(25 - length) / 2 + i]
 								.setImage("pics//cards//"
 										+ cardinfo[i].charAt(0)
 										+ cardinfo[i].substring(1, cardinfo[i]
 												.length()) + ".gif");
-						cardfront[sn][(13 - length) / 2 + i].setVisible(true);
+						cardfront[sn][(25 - length) / 2 + i].setVisible(true);
 						repaint();
 					}
 					buchuarea[sn].setVisible(false);
@@ -895,15 +894,74 @@ public class Gamearea extends JFrame implements MouseListener, Runnable,
 				/*
 				 * 超时
 				 */
-				
+				if (s.equals("oneplayerchaoshi")) {
+					int sn = Integer.parseInt(is.readUTF());
+					if ((sn + 1) % 4 == this.seatnum) {
+						hideDown();
+						chupai.setVisible(true);
+						buchu.setVisible(true);
+					}
+					repaint();
+				}
 				/*
 				 * 胜利
 				 */
-				
+				if (s.equals("youwin")) {
+					startflag = false;
+					JOptionPane.showMessageDialog(null, "恭喜,您获得胜利！", "提示",
+							JOptionPane.INFORMATION_MESSAGE);
+					Isfirst = false; // 此时已经不是第一盘
+					timearea.setIcon(null);
+					start.setVisible(true);
+					chupai.setVisible(false);
+					buchu.setVisible(false);
+					for (int i = 1; i <= 25; i++)
+						card[i].setVisible(false);
+
+					cardinfo = new String[25];
+					mycard = new String[25];
+					myoldcard = new String[25];
+					for (int i = 0; i < 25; i++) {
+						cardinfo[i] = "";
+						mycard[i] = "";
+						myoldcard[i] = "";
+					}
+					leftcardnum[(seatnum + 1) % 4].setVisible(false);
+					leftcardnum[(seatnum + 2) % 4].setVisible(false);
+					leftcardnum[(seatnum + 3) % 4].setVisible(false);
+				}
 				/*
 				 * 失败
 				 */
-				
+				if (s.equals("youfailed")) {
+					String name = is.readUTF();
+					JOptionPane.showMessageDialog(null,  name + "胜利！您失败了","提示",
+							JOptionPane.INFORMATION_MESSAGE);
+					startflag = false;
+					Isfirst = false; // 此时已经不是第一盘
+					timearea.setIcon(null);
+					start.setVisible(true);
+					chupai.setVisible(false);
+					buchu.setVisible(false);
+					for (int i = 1; i <= 25; i++)
+						card[i].setVisible(false);
+
+					cardinfo = new String[25];
+					mycard = new String[25];
+					myoldcard = new String[25];
+					for (int i = 0; i < 25; i++) {
+						cardinfo[i] = "";
+						mycard[i] = "";
+						myoldcard[i] = "";
+					}
+					leftcardnum[(seatnum + 1) % 4].setVisible(false);
+					leftcardnum[(seatnum + 2) % 4].setVisible(false);
+					leftcardnum[(seatnum + 3) % 4].setVisible(false);
+				}
+				if(s.equals("gametalking")){
+					String name=is.readUTF();
+					receive.append(name + "说: " + is.readUTF() + "\n");
+				}
 
 			} catch (IOException e) {
 				this.dispose();
