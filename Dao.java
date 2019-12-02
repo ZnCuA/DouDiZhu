@@ -166,7 +166,7 @@ public class Dao {
 		ArrayList<personSorce> scorequeue = new ArrayList<personSorce>();
 		try {
 			Statement sql = con.createStatement();
-			String str="select userid,score from userinfo order by score ";
+			String str="select userid,score from userinfo order by score desc";
 			ResultSet rs = sql.executeQuery(str);
 			while(rs.next()) {
 				personSorce e =new personSorce(rs.getString("userid"),rs.getInt("score"));
