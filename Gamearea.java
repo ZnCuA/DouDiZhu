@@ -27,6 +27,8 @@ public class Gamearea extends JFrame implements MouseListener, Runnable,
 	PanelArea allarea, gamearea; // 总体区域，游戏区域
 
 	JLabel exit;
+	
+	JLabel search;
 
 	JTextArea receive; // 接收信息区域
 
@@ -300,6 +302,12 @@ public class Gamearea extends JFrame implements MouseListener, Runnable,
 		exit.setIcon(new ImageIcon("pics//sets.png"));
 		exit.addMouseListener(this);
 		allarea.add(exit);
+		
+		search = new JLabel();
+		search.setBounds(785, 120, 100, 100);
+		search.setIcon(new ImageIcon("pics//rank.png"));
+		search.addMouseListener(this);
+		allarea.add(search);
 	}
 
 	/*
@@ -556,6 +564,14 @@ public class Gamearea extends JFrame implements MouseListener, Runnable,
 		}
 		if (e.getSource() == exit)
 			sureExit();
+		
+		if (e.getSource() == search) {
+			try {
+				os.writeUTF("searchsroce");
+				System.out.println("jianting");
+			} catch (IOException e1) {
+			}
+		}
 	}
 
 	/*
@@ -961,6 +977,12 @@ public class Gamearea extends JFrame implements MouseListener, Runnable,
 				if(s.equals("gametalking")){
 					String name=is.readUTF();
 					receive.append(name + "说: " + is.readUTF() + "\n");
+				}
+				
+				if(s.equals("search")) {
+					String usid=is.readUTF();
+					String score=is.readUTF();
+					ScoreTable T = new ScoreTable(usid,score);
 				}
 
 			} catch (IOException e) {
