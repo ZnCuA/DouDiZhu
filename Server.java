@@ -18,6 +18,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Hashtable;
+import java.util.Iterator;
 import java.util.Random;
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -279,6 +280,32 @@ public class Server extends JFrame implements ActionListener {
 									th.os.writeUTF(fromname + "向" + toname
 											+ "说(悄悄话):" + text);
 								}
+							}
+						}
+					}
+					
+					/*查看排行榜*/
+					if(s.equals("searchsroce")) {
+						System.out.println("123456");
+						ArrayList<personSorce> scorequeue = dao.Get();
+						String usid="";
+						String score="";
+						
+						for (int i = 0; i < playerlist.size(); i++) {//取出数组中所有用户线程
+							ServerThread th = playerlist.get(i);
+							if (th == this) {
+								for (Iterator<personSorce> list = scorequeue.iterator(); list.hasNext();) {
+									usid += list.next().getUsid();
+									usid += "#";
+						        }
+								th.os.writeUTF("search");
+								th.os.writeUTF(usid);
+								for (Iterator<personSorce> list = scorequeue.iterator(); list.hasNext();) {
+									score += list.next().getScore();
+									score += "#";
+							    }
+								th.os.writeUTF(score);
+								break;
 							}
 						}
 					}
